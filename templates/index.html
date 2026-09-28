@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>نظام التنبؤ بالأرباح باستخدام الذكاء الاصطناعي</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            background: #f4f6f9;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        /* زر تسجيل الخروج - ثابت أسفل الشاشة */
+        .logout-button {
+            position: fixed;
+            bottom: 20px;
+            left: 25px;
+            background: #dc2626;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 1000;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .logout-button:hover {
+            background: #b91c1c;
+        }
+
+        .header {
+            background: #172554;
+            color: white;
+            padding: 22px 45px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .system-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .system-subtitle {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            font-size: 24px;
+            color: #172554;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #172554;
+            margin-bottom: 22px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+            background: #f9fafb;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .button-container {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .predict-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 45px;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .predict-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 35px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-label {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #172554;
+        }
+
+        .result-status {
+            margin-top: 12px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .waiting {
+            color: #64748b;
+        }
+
+        .profit {
+            color: #15803d;
+        }
+
+        .loss {
+            color: #dc2626;
+        }
+
+        .result-note {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-box h3 {
+            color: #172554;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+
+            .header {
+                padding: 20px;
+            }
+
+            .system-title {
+                font-size: 21px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                margin-top: 25px;
+            }
+
+            .logout-button {
+                bottom: 10px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- تسجيل الخروج -->
+
+    <a href="/logout" class="logout-button">
+        تسجيل الخروج
+    </a>
+
+
+    <!-- رأس النظام -->
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div class="system-title">
+                نظام التنبؤ بالأرباح
+            </div>
+
+            <div class="system-subtitle">
+                نظام دعم القرار باستخدام تقنيات الذكاء الاصطناعي
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- المحتوى الرئيسي -->
+
+    <main class="container">
+
+
+        <!-- الترحيب -->
+
+        <section class="welcome">
+
+            <h2>
+                التنبؤ بالربح المتوقع
+            </h2>
+
+            <p>
+                أدخل بيانات العملية التجارية للحصول على تقدير للربح المتوقع باستخدام نموذج الذكاء الاصطناعي.
+            </p>
+
+        </section>
+
+
+        <!-- بيانات العملية -->
+
+        <section class="card">
+
+            <div class="card-title">
+                بيانات العملية التجارية
+            </div>
+
+
+            <form action="/predict" method="POST">
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            قيمة المبيعات
+                        </label>
+
+                        <input
+                            type="number"
+                            name="sales"
+                            step="any"
+                            placeholder="مثال: 500"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            الكمية
+                        </label>
+
+                        <input
+                            type="number"
+                            name="quantity"
+                            placeholder="مثال: 5"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            الخصم
+                        </label>
+
+                        <input
+                            type="number"
+                            name="discount"
+                            step="any"
+                            placeholder="مثال: 0.10"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            تكلفة الشحن
+                        </label>
+
+                        <input
+                            type="number"
+                            name="shipping_cost"
+                            step="any"
+                            placeholder="مثال: 10"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            السنة
+                        </label>
+
+                        <input
+                            type="number"
+                            name="year"
+                            placeholder="مثال: 2015"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            رقم الأسبوع
+                        </label>
+
+                        <input
+                            type="number"
+                            name="weeknum"
+                            placeholder="مثال: 20"
+                            required
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="button-container">
+
+                    <button
+                        type="submit"
+                        class="predict-button"
+                    >
+                        تنفيذ التنبؤ
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- نتيجة التنبؤ -->
+
+        <section class="card">
+
+            <div class="card-title">
+                نتيجة التنبؤ
+            </div>
+
+
+            <div class="result-box">
+
+                <div class="result-label">
+                    الربح المتوقع
+                </div>
+
+
+                <div class="result-value">
+                    {{ profit if profit is defined else "—" }}
+                </div>
+
+
+                {% if profit is defined %}
+
+                    {% if profit > 0 %}
+
+                        <div class="result-status profit">
+                            الحالة: ربح متوقع
+                        </div>
+
+                    {% elif profit < 0 %}
+
+                        <div class="result-status loss">
+                            الحالة: خسارة متوقعة
+                        </div>
+
+                    {% else %}
+
+                        <div class="result-status waiting">
+                            الحالة: تعادل
+                        </div>
+
+                    {% endif %}
+
+                {% else %}
+
+                    <div class="result-status waiting">
+                        في انتظار تنفيذ التنبؤ
+                    </div>
+
+                {% endif %}
+
+
+                <div class="result-note">
+                    يتم حساب النتيجة بواسطة نموذج التعلم الآلي.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- حول النظام -->
+
+        <section class="card">
+
+            <div class="card-title">
+                حول النظام
+            </div>
+
+
+            <div class="info-grid">
+
+
+                <div class="info-box">
+
+                    <h3>
+                        الذكاء الاصطناعي
+                    </h3>
+
+                    <p>
+                        يعتمد النظام على نموذج تعلم آلي للتنبؤ بقيمة الربح المتوقعة.
+                    </p>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <h3>
+                        تحليل البيانات
+                    </h3>
+
+                    <p>
+                        يتم استخدام بيانات العملية التجارية كمدخلات للنموذج.
+                    </p>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <h3>
+                        دعم القرار
+                    </h3>
+
+                    <p>
+                        تساعد النتائج المتوقعة في تحليل الحالة التجارية ودعم اتخاذ القرار.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- التذييل -->
+
+    <footer class="footer">
+
+        نظام التنبؤ بالأرباح باستخدام الذكاء الاصطناعي
+
+        <br>
+
+        مشروع تخرج – نظم المعلومات المحاسبية
+
+    </footer>
+
+
+</body>
+
+</html>
+```
