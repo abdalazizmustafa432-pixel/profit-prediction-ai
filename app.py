@@ -12,6 +12,38 @@ app.secret_key = "مفتاح_سري_للمشروع"
 model = joblib.load("النموذج/نموذج_التنبؤ_بالأرباح.pkl")
 
 
+# إنشاء قاعدة البيانات وجدول المستخدمين تلقائيًا
+def init_database():
+
+    conn = sqlite3.connect("المستخدمون.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+
+    # إنشاء مستخدم افتراضي إذا كانت قاعدة البيانات جديدة
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        cursor.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            ("admin", "1234")
+        )
+
+    conn.commit()
+    conn.close()
+
+
+# تهيئة قاعدة البيانات عند تشغيل النظام
+init_database()
+
+
 # الصفحة الرئيسية
 @app.route("/")
 def home():
